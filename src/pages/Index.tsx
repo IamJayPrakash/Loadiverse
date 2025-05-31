@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Copy, Download, Heart, Star, Filter, Grid3X3, List, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import LoaderShowcase from '@/components/LoaderShowcase';
 import LoaderGrid from '@/components/LoaderGrid';
 import HeroSection from '@/components/HeroSection';
 import CategoryFilter from '@/components/CategoryFilter';
+import { allLoaders, loaderCategories } from '@/data/loaders';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +49,7 @@ const Index = () => {
                 </h1>
               </div>
               <Badge variant="secondary" className="hidden sm:inline-flex">
-                1000+ Loaders
+                {allLoaders.length.toLocaleString()}+ Loaders
               </Badge>
             </div>
             
@@ -110,15 +110,11 @@ const Index = () => {
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="spinners">Spinners</SelectItem>
-                    <SelectItem value="pulses">Pulses</SelectItem>
-                    <SelectItem value="waves">Waves</SelectItem>
-                    <SelectItem value="bars">Bars</SelectItem>
-                    <SelectItem value="dots">Dots</SelectItem>
-                    <SelectItem value="flowers">Flowers</SelectItem>
-                    <SelectItem value="morphing">Morphing</SelectItem>
-                    <SelectItem value="gradient">Gradient</SelectItem>
+                    {loaderCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
@@ -163,11 +159,15 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">1000+</div>
+            <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+              {allLoaders.length.toLocaleString()}+
+            </div>
             <div className="text-slate-600 dark:text-slate-300 mt-2">Unique Loaders</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-pink-600 dark:text-pink-400">15+</div>
+            <div className="text-3xl font-bold text-pink-600 dark:text-pink-400">
+              {loaderCategories.length - 1}+
+            </div>
             <div className="text-slate-600 dark:text-slate-300 mt-2">Categories</div>
           </div>
           <div className="text-center">

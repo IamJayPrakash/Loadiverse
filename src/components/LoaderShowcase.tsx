@@ -5,124 +5,49 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Copy, Download, Heart, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { allLoaders } from '@/data/loaders';
 
 const LoaderShowcase = () => {
   const { toast } = useToast();
 
-  const featuredLoaders = [
-    {
-      id: 1,
-      name: 'Cosmic Spinner',
-      category: 'Gradient',
-      type: 'CSS',
-      component: (
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 rounded-full animate-spin"></div>
-          <div className="absolute inset-2 bg-white dark:bg-slate-800 rounded-full"></div>
-          <div className="absolute inset-4 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-pulse"></div>
-        </div>
-      ),
-      code: `<div class="relative w-16 h-16">
-  <div class="absolute inset-0 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 rounded-full animate-spin"></div>
-  <div class="absolute inset-2 bg-white rounded-full"></div>
-  <div class="absolute inset-4 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-pulse"></div>
-</div>`,
-      downloads: 1250,
-      likes: 89
-    },
-    {
-      id: 2,
-      name: 'Flower Bloom',
-      category: 'Flower',
-      type: 'CSS + JS',
-      component: (
-        <div className="relative w-16 h-16 flex items-center justify-center">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-3 h-6 bg-gradient-to-t from-pink-500 to-yellow-400 rounded-full animate-pulse"
-              style={{
-                transform: `rotate(${i * 45}deg) translateY(-20px)`,
-                transformOrigin: 'center 20px',
-                animationDelay: `${i * 0.2}s`
-              }}
-            ></div>
-          ))}
-          <div className="absolute w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
-        </div>
-      ),
-      code: `<!-- HTML -->
-<div class="flower-loader">
-  <div class="petal" style="--i: 0"></div>
-  <div class="petal" style="--i: 1"></div>
-  <!-- ... more petals -->
-  <div class="center"></div>
-</div>
+  // Get featured loaders (top rated ones)
+  const featuredLoaders = allLoaders
+    .filter(loader => loader.likes > 100)
+    .sort((a, b) => b.likes - a.likes)
+    .slice(0, 6);
 
-/* CSS */
-.flower-loader { position: relative; width: 64px; height: 64px; }
-.petal { 
-  position: absolute; 
-  width: 12px; 
-  height: 24px; 
-  background: linear-gradient(to top, #ec4899, #fbbf24);
-  border-radius: 50%;
-  transform: rotate(calc(var(--i) * 45deg)) translateY(-20px);
-  animation: bloom 1.6s ease-in-out infinite;
-  animation-delay: calc(var(--i) * 0.2s);
-}`,
-      downloads: 890,
-      likes: 156
-    },
-    {
-      id: 3,
-      name: 'Wave Ripple',
-      category: 'Wave',
-      type: 'Pure CSS',
-      component: (
-        <div className="flex items-center space-x-1">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="w-2 bg-blue-500 rounded-full animate-pulse"
-              style={{
-                height: `${20 + Math.sin(Date.now() / 200 + i) * 10}px`,
-                animationDelay: `${i * 0.1}s`,
-                animationDuration: '1s'
-              }}
-            ></div>
-          ))}
-        </div>
-      ),
-      code: `.wave-loader {
-  display: flex;
-  gap: 4px;
-}
-.wave-bar {
-  width: 8px;
-  height: 40px;
-  background: #3b82f6;
-  border-radius: 4px;
-  animation: wave 1s ease-in-out infinite;
-}
-.wave-bar:nth-child(2) { animation-delay: 0.1s; }
-.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+  const copyCode = (loader: any) => {
+    const fullCode = `<!-- ${loader.name} -->
+<!-- HTML -->
+${loader.htmlCode}
 
-@keyframes wave {
-  0%, 100% { transform: scaleY(0.5); }
-  50% { transform: scaleY(1); }
-}`,
-      downloads: 2100,
-      likes: 203
-    }
-  ];
+<!-- CSS -->
+<style>
+${loader.cssCode}
+</style>
 
-  const copyCode = (code: string, name: string) => {
-    navigator.clipboard.writeText(code);
+${loader.jsCode ? `<!-- JavaScript -->
+<script>
+${loader.jsCode}
+</script>` : ''}`;
+
+    navigator.clipboard.writeText(fullCode);
     toast({
       title: "Code copied!",
-      description: `${name} code has been copied to your clipboard.`,
+      description: `${loader.name} code has been copied to your clipboard.`,
     });
+  };
+
+  // Create safe HTML for loader preview
+  const createLoaderHTML = (loader: any) => {
+    return {
+      __html: `
+        <style>
+          ${loader.cssCode}
+        </style>
+        ${loader.htmlCode}
+      `
+    };
   };
 
   return (
@@ -149,17 +74,36 @@ const LoaderShowcase = () => {
                     <Badge variant="outline" className="text-xs">
                       {loader.category}
                     </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {loader.type}
+                    <Badge 
+                      variant="secondary" 
+                      className={`text-xs ${
+                        loader.complexity === 'simple' ? 'bg-green-100 text-green-800' :
+                        loader.complexity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {loader.complexity}
                     </Badge>
                   </div>
                 </div>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {loader.description}
+                </p>
               </CardHeader>
               
               <CardContent className="space-y-6">
                 {/* Loader Preview */}
                 <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl p-8 flex items-center justify-center min-h-[120px]">
-                  {loader.component}
+                  <div dangerouslySetInnerHTML={createLoaderHTML(loader)} />
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {loader.tags.slice(0, 3).map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
 
                 {/* Stats */}
@@ -183,7 +127,7 @@ const LoaderShowcase = () => {
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => copyCode(loader.code, loader.name)}
+                    onClick={() => copyCode(loader)}
                     className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
                     <Copy className="h-4 w-4 mr-2" />

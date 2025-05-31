@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { loaderCategories } from '@/data/loaders';
 import { 
   RotateCw, 
   Circle, 
@@ -12,11 +13,7 @@ import {
   Zap, 
   Palette,
   Heart,
-  Square,
-  Triangle,
-  Star,
-  Hexagon,
-  Diamond
+  Grid3X3
 } from 'lucide-react';
 
 interface CategoryFilterProps {
@@ -24,22 +21,18 @@ interface CategoryFilterProps {
   onCategoryChange: (category: string) => void;
 }
 
-const categories = [
-  { id: 'all', name: 'All', icon: MoreHorizontal, count: 1000 },
-  { id: 'spinners', name: 'Spinners', icon: RotateCw, count: 150 },
-  { id: 'pulses', name: 'Pulses', icon: Circle, count: 120 },
-  { id: 'waves', name: 'Waves', icon: Waves, count: 80 },
-  { id: 'bars', name: 'Bars', icon: BarChart3, count: 90 },
-  { id: 'dots', name: 'Dots', icon: MoreHorizontal, count: 100 },
-  { id: 'flowers', name: 'Flowers', icon: Flower, count: 60 },
-  { id: 'morphing', name: 'Morphing', icon: Zap, count: 70 },
-  { id: 'gradient', name: 'Gradient', icon: Palette, count: 110 },
-  { id: 'hearts', name: 'Hearts', icon: Heart, count: 40 },
-  { id: 'geometric', name: 'Geometric', icon: Square, count: 85 },
-  { id: 'stars', name: 'Stars', icon: Star, count: 45 },
-  { id: 'polygons', name: 'Polygons', icon: Hexagon, count: 35 },
-  { id: 'diamonds', name: 'Diamonds', icon: Diamond, count: 25 }
-];
+const iconMap: Record<string, any> = {
+  'Grid': Grid3X3,
+  'RotateCw': RotateCw,
+  'MoreHorizontal': MoreHorizontal,
+  'BarChart3': BarChart3,
+  'Circle': Circle,
+  'Flower': Flower,
+  'Heart': Heart,
+  'Waves': Waves,
+  'Palette': Palette,
+  'Zap': Zap
+};
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCategoryChange }) => {
   return (
@@ -49,9 +42,9 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ selectedCategory, onCat
           Browse by Category
         </h2>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {categories.map((category) => {
-            const Icon = category.icon;
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {loaderCategories.map((category) => {
+            const Icon = iconMap[category.icon] || Grid3X3;
             const isSelected = selectedCategory === category.id;
             
             return (

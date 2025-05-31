@@ -1,12 +1,13 @@
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Copy, Heart, Download, Eye, Palette, Zap, Settings } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import LoaderComponent from '@/components/LoaderComponent';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Search, Filter, SortAsc, SortDesc } from 'lucide-react';
+import LoaderCard from '@/components/LoaderCard';
+import { allLoaders } from '@/data/loaders';
+import { LoaderMetadata } from '@/types/loader';
 
 interface LoaderGridProps {
   searchTerm: string;
@@ -15,230 +16,213 @@ interface LoaderGridProps {
 }
 
 const LoaderGrid: React.FC<LoaderGridProps> = ({ searchTerm, selectedCategory, viewMode }) => {
-  const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [complexityFilter, setComplexityFilter] = useState('all');
+  const [sizeFilter, setSizeFilter] = useState('all');
+  const [speedFilter, setSpeedFilter] = useState('all');
   const loadersPerPage = 24;
 
-  // Generate a comprehensive list of loaders
-  const allLoaders = useMemo(() => {
-    const loaderTypes = [
-      // Spinners (150)
-      ...Array.from({ length: 150 }, (_, i) => ({
-        id: i + 1,
-        name: `Spinner ${i + 1}`,
-        category: 'spinners',
-        type: ['Pure CSS', 'CSS + JS', 'SVG'][i % 3],
-        variant: ['classic', 'modern', 'elegant', 'futuristic'][i % 4],
-        downloads: Math.floor(Math.random() * 5000) + 100,
-        likes: Math.floor(Math.random() * 200) + 10,
-        colors: ['gradient', 'solid', 'rainbow'][i % 3]
-      })),
-      
-      // Pulses (120)
-      ...Array.from({ length: 120 }, (_, i) => ({
-        id: i + 151,
-        name: `Pulse ${i + 1}`,
-        category: 'pulses',
-        type: ['Pure CSS', 'CSS + JS'][i % 2],
-        variant: ['circle', 'square', 'heart', 'star'][i % 4],
-        downloads: Math.floor(Math.random() * 3000) + 150,
-        likes: Math.floor(Math.random() * 150) + 5,
-        colors: ['blue', 'purple', 'pink', 'green'][i % 4]
-      })),
-      
-      // Waves (80)
-      ...Array.from({ length: 80 }, (_, i) => ({
-        id: i + 271,
-        name: `Wave ${i + 1}`,
-        category: 'waves',
-        type: ['Pure CSS', 'CSS + JS', 'Canvas'][i % 3],
-        variant: ['sine', 'triangle', 'square', 'sawtooth'][i % 4],
-        downloads: Math.floor(Math.random() * 2500) + 200,
-        likes: Math.floor(Math.random() * 180) + 8,
-        colors: ['ocean', 'sunset', 'neon', 'pastel'][i % 4]
-      })),
-      
-      // Bars (90)
-      ...Array.from({ length: 90 }, (_, i) => ({
-        id: i + 351,
-        name: `Bar ${i + 1}`,
-        category: 'bars',
-        type: ['Pure CSS', 'SVG'][i % 2],
-        variant: ['vertical', 'horizontal', 'circular', 'diagonal'][i % 4],
-        downloads: Math.floor(Math.random() * 2000) + 300,
-        likes: Math.floor(Math.random() * 120) + 12,
-        colors: ['monochrome', 'gradient', 'rainbow'][i % 3]
-      })),
-      
-      // Dots (100)
-      ...Array.from({ length: 100 }, (_, i) => ({
-        id: i + 441,
-        name: `Dots ${i + 1}`,
-        category: 'dots',
-        type: ['Pure CSS', 'CSS + JS'][i % 2],
-        variant: ['bounce', 'fade', 'scale', 'rotate'][i % 4],
-        downloads: Math.floor(Math.random() * 4000) + 250,
-        likes: Math.floor(Math.random() * 190) + 15,
-        colors: ['solid', 'gradient', 'themed'][i % 3]
-      })),
-      
-      // Flowers (60)
-      ...Array.from({ length: 60 }, (_, i) => ({
-        id: i + 541,
-        name: `Flower ${i + 1}`,
-        category: 'flowers',
-        type: ['CSS + JS', 'SVG', 'Canvas'][i % 3],
-        variant: ['bloom', 'petals', 'garden', 'lotus'][i % 4],
-        downloads: Math.floor(Math.random() * 1800) + 180,
-        likes: Math.floor(Math.random() * 160) + 20,
-        colors: ['natural', 'vibrant', 'pastel', 'dark'][i % 4]
-      })),
-      
-      // Morphing (70)
-      ...Array.from({ length: 70 }, (_, i) => ({
-        id: i + 601,
-        name: `Morph ${i + 1}`,
-        category: 'morphing',
-        type: ['CSS + JS', 'SVG', 'Canvas'][i % 3],
-        variant: ['shape', 'liquid', 'elastic', 'transform'][i % 4],
-        downloads: Math.floor(Math.random() * 2200) + 120,
-        likes: Math.floor(Math.random() * 140) + 18,
-        colors: ['fluid', 'electric', 'organic'][i % 3]
-      })),
-      
-      // Gradients (110)
-      ...Array.from({ length: 110 }, (_, i) => ({
-        id: i + 671,
-        name: `Gradient ${i + 1}`,
-        category: 'gradient',
-        type: ['Pure CSS', 'CSS + JS'][i % 2],
-        variant: ['linear', 'radial', 'conic', 'mesh'][i % 4],
-        downloads: Math.floor(Math.random() * 3500) + 400,
-        likes: Math.floor(Math.random() * 220) + 25,
-        colors: ['sunset', 'ocean', 'forest', 'cosmic'][i % 4]
-      })),
-      
-      // Hearts (40)
-      ...Array.from({ length: 40 }, (_, i) => ({
-        id: i + 781,
-        name: `Heart ${i + 1}`,
-        category: 'hearts',
-        type: ['Pure CSS', 'SVG'][i % 2],
-        variant: ['beat', 'pulse', 'love', 'romantic'][i % 4],
-        downloads: Math.floor(Math.random() * 1500) + 90,
-        likes: Math.floor(Math.random() * 300) + 50,
-        colors: ['red', 'pink', 'rainbow', 'white'][i % 4]
-      })),
-      
-      // Geometric (85)
-      ...Array.from({ length: 85 }, (_, i) => ({
-        id: i + 821,
-        name: `Geometric ${i + 1}`,
-        category: 'geometric',
-        type: ['Pure CSS', 'SVG', 'Canvas'][i % 3],
-        variant: ['polygon', 'sacred', 'minimal', 'complex'][i % 4],
-        downloads: Math.floor(Math.random() * 2800) + 160,
-        likes: Math.floor(Math.random() * 170) + 12,
-        colors: ['monochrome', 'dual', 'gradient'][i % 3]
-      })),
-      
-      // Stars (45)
-      ...Array.from({ length: 45 }, (_, i) => ({
-        id: i + 906,
-        name: `Star ${i + 1}`,
-        category: 'stars',
-        type: ['Pure CSS', 'SVG'][i % 2],
-        variant: ['twinkle', 'shooting', 'constellation', 'galaxy'][i % 4],
-        downloads: Math.floor(Math.random() * 1200) + 110,
-        likes: Math.floor(Math.random() * 130) + 22,
-        colors: ['gold', 'silver', 'cosmic', 'bright'][i % 4]
-      })),
-      
-      // Polygons (35)
-      ...Array.from({ length: 35 }, (_, i) => ({
-        id: i + 951,
-        name: `Polygon ${i + 1}`,
-        category: 'polygons',
-        type: ['SVG', 'Canvas'][i % 2],
-        variant: ['hexagon', 'triangle', 'pentagon', 'octagon'][i % 4],
-        downloads: Math.floor(Math.random() * 1000) + 80,
-        likes: Math.floor(Math.random() * 100) + 8,
-        colors: ['geometric', 'gradient', 'solid'][i % 3]
-      })),
-      
-      // Diamonds (25)
-      ...Array.from({ length: 25 }, (_, i) => ({
-        id: i + 986,
-        name: `Diamond ${i + 1}`,
-        category: 'diamonds',
-        type: ['Pure CSS', 'SVG'][i % 2],
-        variant: ['sparkle', 'crystal', 'gem', 'brilliant'][i % 4],
-        downloads: Math.floor(Math.random() * 800) + 60,
-        likes: Math.floor(Math.random() * 90) + 15,
-        colors: ['crystal', 'rainbow', 'white', 'blue'][i % 4]
-      }))
-    ];
-    
-    return loaderTypes;
-  }, []);
-
-  // Filter loaders based on search and category
-  const filteredLoaders = useMemo(() => {
+  // Filter and sort loaders
+  const filteredAndSortedLoaders = useMemo(() => {
     let filtered = allLoaders;
 
+    // Category filter
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(loader => loader.category === selectedCategory);
     }
 
+    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(loader =>
         loader.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         loader.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        loader.variant.toLowerCase().includes(searchTerm.toLowerCase())
+        loader.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        loader.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
+    // Additional filters
+    if (complexityFilter !== 'all') {
+      filtered = filtered.filter(loader => loader.complexity === complexityFilter);
+    }
+
+    if (sizeFilter !== 'all') {
+      filtered = filtered.filter(loader => loader.size === sizeFilter);
+    }
+
+    if (speedFilter !== 'all') {
+      filtered = filtered.filter(loader => loader.speed === speedFilter);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'downloads':
+          aValue = a.downloads;
+          bValue = b.downloads;
+          break;
+        case 'likes':
+          aValue = a.likes;
+          bValue = b.likes;
+          break;
+        case 'created':
+          aValue = new Date(a.createdAt);
+          bValue = new Date(b.createdAt);
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
     return filtered;
-  }, [allLoaders, selectedCategory, searchTerm]);
+  }, [searchTerm, selectedCategory, complexityFilter, sizeFilter, speedFilter, sortBy, sortOrder]);
 
   // Paginate loaders
   const paginatedLoaders = useMemo(() => {
     const startIndex = (currentPage - 1) * loadersPerPage;
-    return filteredLoaders.slice(startIndex, startIndex + loadersPerPage);
-  }, [filteredLoaders, currentPage, loadersPerPage]);
+    return filteredAndSortedLoaders.slice(startIndex, startIndex + loadersPerPage);
+  }, [filteredAndSortedLoaders, currentPage, loadersPerPage]);
 
-  const totalPages = Math.ceil(filteredLoaders.length / loadersPerPage);
+  const totalPages = Math.ceil(filteredAndSortedLoaders.length / loadersPerPage);
 
-  const copyCode = (loader: any) => {
-    const code = `/* ${loader.name} Loader */
-.loader-${loader.id} {
-  /* Loader styles will be generated based on type and variant */
-  animation: loader-${loader.id} 1s infinite;
-}
-
-@keyframes loader-${loader.id} {
-  /* Animation keyframes */
-}`;
-    
-    navigator.clipboard.writeText(code);
-    toast({
-      title: "Code copied!",
-      description: `${loader.name} code has been copied to your clipboard.`,
-    });
+  const resetFilters = () => {
+    setComplexityFilter('all');
+    setSizeFilter('all');
+    setSpeedFilter('all');
+    setSortBy('name');
+    setSortOrder('asc');
+    setCurrentPage(1);
   };
 
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="max-w-7xl mx-auto">
+        {/* Advanced Filters */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Input
+                placeholder="Search by name, category, or tags..."
+                value={searchTerm}
+                readOnly
+                className="pl-10 pr-4"
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3">
+              <Select value={complexityFilter} onValueChange={setComplexityFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Complexity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="simple">Simple</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="complex">Complex</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sizeFilter} onValueChange={setSizeFilter}>
+                <SelectTrigger className="w-28">
+                  <SelectValue placeholder="Size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sizes</SelectItem>
+                  <SelectItem value="xs">XS</SelectItem>
+                  <SelectItem value="sm">SM</SelectItem>
+                  <SelectItem value="md">MD</SelectItem>
+                  <SelectItem value="lg">LG</SelectItem>
+                  <SelectItem value="xl">XL</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={speedFilter} onValueChange={setSpeedFilter}>
+                <SelectTrigger className="w-28">
+                  <SelectValue placeholder="Speed" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Speeds</SelectItem>
+                  <SelectItem value="slow">Slow</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="fast">Fast</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="downloads">Downloads</SelectItem>
+                  <SelectItem value="likes">Likes</SelectItem>
+                  <SelectItem value="created">Created</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              >
+                {sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={resetFilters}>
+                <Filter className="h-4 w-4 mr-2" />
+                Clear
+              </Button>
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {complexityFilter !== 'all' && (
+              <Badge variant="secondary" className="text-xs">
+                Complexity: {complexityFilter}
+              </Badge>
+            )}
+            {sizeFilter !== 'all' && (
+              <Badge variant="secondary" className="text-xs">
+                Size: {sizeFilter.toUpperCase()}
+              </Badge>
+            )}
+            {speedFilter !== 'all' && (
+              <Badge variant="secondary" className="text-xs">
+                Speed: {speedFilter}
+              </Badge>
+            )}
+          </div>
+        </div>
+
         {/* Results Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
               {selectedCategory === 'all' ? 'All Loaders' : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Loaders`}
             </h2>
-            <p className="text-slate-600 dark:text-slate-300 mt-1">
-              Showing {filteredLoaders.length} loaders
+            <p className="text-slate-600 dark:text-slate-300 mt-2">
+              Showing {filteredAndSortedLoaders.length} loaders
               {searchTerm && ` for "${searchTerm}"`}
+              {selectedCategory !== 'all' && ` in ${selectedCategory}`}
             </p>
           </div>
           
@@ -247,82 +231,38 @@ const LoaderGrid: React.FC<LoaderGridProps> = ({ searchTerm, selectedCategory, v
           </div>
         </div>
 
+        {/* No Results */}
+        {filteredAndSortedLoaders.length === 0 && (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🔍</div>
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+              No loaders found
+            </h3>
+            <p className="text-slate-600 dark:text-slate-300 mb-4">
+              Try adjusting your search terms or filters
+            </p>
+            <Button onClick={resetFilters} variant="outline">
+              Clear all filters
+            </Button>
+          </div>
+        )}
+
         {/* Loader Grid */}
-        <div className={`grid gap-6 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-            : 'grid-cols-1'
-        }`}>
-          {paginatedLoaders.map((loader) => (
-            <Card key={loader.id} className="group hover:shadow-xl transition-all duration-300 border hover:border-purple-200 dark:hover:border-purple-700">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
-                    {loader.name}
-                  </CardTitle>
-                  <div className="flex items-center space-x-1">
-                    <Badge variant="outline" className="text-xs">
-                      {loader.type}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400">
-                  <span>{loader.variant}</span>
-                  <span>•</span>
-                  <span>{loader.colors}</span>
-                </div>
-              </CardHeader>
-              
-              <CardContent className="space-y-4">
-                {/* Loader Preview */}
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl p-6 flex items-center justify-center min-h-[100px]">
-                  <LoaderComponent 
-                    type={loader.category}
-                    variant={loader.variant}
-                    id={loader.id}
-                  />
-                </div>
-
-                {/* Stats */}
-                <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                  <div className="flex items-center space-x-3">
-                    <span className="flex items-center">
-                      <Download className="h-3 w-3 mr-1" />
-                      {loader.downloads.toLocaleString()}
-                    </span>
-                    <span className="flex items-center">
-                      <Heart className="h-3 w-3 mr-1" />
-                      {loader.likes}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Button variant="ghost" size="sm">
-                      <Settings className="h-3 w-3" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => copyCode(loader)}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    size="sm"
-                  >
-                    <Copy className="h-3 w-3 mr-2" />
-                    Copy
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Heart className="h-3 w-3" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {filteredAndSortedLoaders.length > 0 && (
+          <div className={`grid gap-6 ${
+            viewMode === 'grid' 
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+              : 'grid-cols-1'
+          }`}>
+            {paginatedLoaders.map((loader) => (
+              <LoaderCard
+                key={loader.id}
+                loader={loader}
+                viewMode={viewMode as 'grid' | 'list'}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -336,8 +276,18 @@ const LoaderGrid: React.FC<LoaderGridProps> = ({ searchTerm, selectedCategory, v
             </Button>
             
             <div className="flex items-center space-x-2">
-              {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                const page = i + 1;
+              {[...Array(Math.min(7, totalPages))].map((_, i) => {
+                let page;
+                if (totalPages <= 7) {
+                  page = i + 1;
+                } else if (currentPage <= 4) {
+                  page = i + 1;
+                } else if (currentPage >= totalPages - 3) {
+                  page = totalPages - 6 + i;
+                } else {
+                  page = currentPage - 3 + i;
+                }
+
                 return (
                   <Button
                     key={page}
@@ -361,7 +311,7 @@ const LoaderGrid: React.FC<LoaderGridProps> = ({ searchTerm, selectedCategory, v
           </div>
         )}
 
-        {/* Load More Button for Mobile */}
+        {/* Load More for Mobile */}
         <div className="text-center mt-8 md:hidden">
           <Button 
             variant="outline" 
